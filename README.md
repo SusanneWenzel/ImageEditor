@@ -13,6 +13,34 @@ A high-performance C++ tool for offscreen image transformation and grayscale con
 
 ---
 
+## Usage
+
+The `ImageEditor` can be used both as a GUI application and as a command-line tool for automated batch processing.
+
+### Batch Mode (Offscreen)
+For server environments or automated scripts, use the `--batch` flag combined with the `-platform minimal` plugin to run without a display.
+
+**Basic Image Conversion:**
+```bash
+./ImageEditor -platform minimal --batch -f input.jpg -o output.png
+
+Using JSON Projects:
+  You can apply a history of transformations by providing a JSON project file:
+    ./ImageEditor -platform minimal --batch --project transformations.json -o result.png
+
+Displaying Information:T
+  To see the history of recent calls: ./ImageEditor --history
+  To check the version: ./ImageEditor -v
+
+Command Line Options
+ Option   Description
+ -f, --file <file>Path to the input image file.
+ --project <json>Path to an input JSON project file (transformation history).
+ -o, --output <file>Path where the processed image will be saved.
+ --batchRequired for CLI. Runs without the graphical user interface.
+ --historyPrints the history of previous operations to stdout.
+ --vulkanEnables hardware-accelerated Vulkan rendering (if supported).
+
 ## Prerequisites
 
 Before compiling, ensure you have the Qt6 development environment and CMake installed.
@@ -55,7 +83,7 @@ Since this tool is designed for server environments without a monitor, you must 
 Standard Command:
 
 Bash
-./image_transformer -platform minimal --input input.png --output output.png
+./ImageEditor --input input.png --output output.png
 Alternative via Environment Variable:
 
 Bash
