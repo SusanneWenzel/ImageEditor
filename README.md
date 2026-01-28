@@ -1,11 +1,12 @@
 # ImageEditor
 
 Markdown
-# Qt6 Offscreen Image Transformer
+# Qt6 Image Editor
 
-A high-performance C++ tool for offscreen image transformation and grayscale conversion, optimized for both **Debian Linux** and **macOS**.
+A high-performance C++ tool for basic editing histological sections and offscreen image transformation, optimized for both **Debian Linux** and **macOS**.
 
 ## Features
+- **Basic interactive image manipulation tools**: Provides a few image manipulation tools, the use of which can be fully documented and saved in a JSON project file for later use. 
 - **Offscreen Rendering**: Operates without an X-Server or Display (ideal for servers and CLI environments).
 - **Qt6 Native**: Uses the latest Qt 6 API for stable image manipulations.
 - **High-Resolution Support**: Automatically bypasses the default 128MB allocation limit for images > 5700x5700px.
@@ -15,18 +16,20 @@ A high-performance C++ tool for offscreen image transformation and grayscale con
 
 ## Usage
 
-The `ImageEditor` can be used both as a GUI application and as a command-line tool for automated batch processing.
+The `ImageEditor` can be used both as a GUI application and as a command-line tool for automated batch processing. Although it offers
+only a very limited number of image editing tools, their use is fully documented. The complete processing pipeline can be saved in a
+JSON project file, so that all image operations performed are fully documented. This can then be applied to the original file later in batch mode.  
 
 ### Batch Mode (Offscreen)
 For server environments or automated scripts, use the `--batch` flag combined with the `-platform minimal` plugin to run without a display.
 
 **Basic Image Conversion:**
 ```bash
-./ImageEditor -platform minimal --batch -f input.jpg -o output.png
+./ImageEditor --batch -f input.jpg -o output.png
 
 **Using JSON Projects:**
   You can apply a history of transformations by providing a JSON project file:
-    ./ImageEditor -platform minimal --batch --project transformations.json -o result.png
+    ./ImageEditor --batch --project transformations.json -o result.png
 
 **Displaying Information:**
   To see the history of recent calls: ./ImageEditor --history
@@ -71,7 +74,8 @@ mkdir build && cd build
 Configure the project:
 
 Bash
-cmake ..
+cmake .. -DQT_FEATURE_vulkan=OFF
+cmake --build .
 Compile:
 
 Bash
