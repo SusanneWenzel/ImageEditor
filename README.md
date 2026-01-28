@@ -24,15 +24,15 @@ For server environments or automated scripts, use the `--batch` flag combined wi
 ```bash
 ./ImageEditor -platform minimal --batch -f input.jpg -o output.png
 
-Using JSON Projects:
+**Using JSON Projects:**
   You can apply a history of transformations by providing a JSON project file:
     ./ImageEditor -platform minimal --batch --project transformations.json -o result.png
 
-Displaying Information:T
+**Displaying Information:**
   To see the history of recent calls: ./ImageEditor --history
   To check the version: ./ImageEditor -v
 
-Command Line Options
+**Command Line Options**
  Option   Description
  -f, --file <file>Path to the input image file.
  --project <json>Path to an input JSON project file (transformation history).
