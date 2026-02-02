@@ -64,6 +64,9 @@ bool ImageLoader::load( const QString& filePath, bool asImage )
   } else {
    if ( asImage ) {
     m_image.load(filePath);
+    if ( m_image.format() == QImage::Format_Indexed8 || m_image.format() == QImage::Format_Mono ) {
+     m_image = m_image.convertToFormat(QImage::Format_ARGB32);
+    }
    } else {
     m_pixmap.load(filePath);
    }

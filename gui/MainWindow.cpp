@@ -65,7 +65,7 @@ static QBrush createCheckerBrush( int tileSize=16, QColor c1=QColor("#3a3a3a"), 
 MainWindow::MainWindow( const QString& imagePath, const QString& historyPath, bool useVulkan, QWidget* parent )
     : QMainWindow(parent)
 {
-  std::cout << "MainWindow::MainWindow(): imagePath=" << imagePath.toStdString() << ", projectPath=" << historyPath.toStdString() << std::endl;
+  // std::cout << "MainWindow::MainWindow(): imagePath=" << imagePath.toStdString() << ", projectPath=" << historyPath.toStdString() << std::endl;
   {
     // setup Gimp style
     // QCoreApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles);
@@ -119,7 +119,7 @@ MainWindow::MainWindow( const QString& imagePath, const QString& historyPath, bo
 // -> m_imageView->getScene()->addItem(m_layerItem);
 bool MainWindow::loadImage( const QString& filePath )
 {
-  std::cout << "MainWindow::loadImage(): filePath=" << filePath.toStdString() << std::endl;
+  // std::cout << "MainWindow::loadImage(): filePath=" << filePath.toStdString() << std::endl;
   {
     ImageLoader loader;
     if ( !loader.load(filePath) ) {
@@ -260,7 +260,7 @@ bool MainWindow::saveProject( const QString& filePath )
 
 bool MainWindow::loadProject( const QString& filePath, bool skipMainImage )
 {
-  std::cout << "MainWindow::loadProject(): filename=" << filePath.toStdString() << ", skipMainImage=" << skipMainImage << std::endl;
+  // std::cout << "MainWindow::loadProject(): filename=" << filePath.toStdString() << ", skipMainImage=" << skipMainImage << std::endl;
   {
     QFile f(filePath);
     if ( !f.open(QIODevice::ReadOnly) ) return false;
@@ -329,12 +329,12 @@ bool MainWindow::loadProject( const QString& filePath, bool skipMainImage )
     for ( auto* item : m_imageView->getScene()->items(Qt::DescendingOrder) ) {
       auto* layer = dynamic_cast<LayerItem*>(item);
       if ( layer ) {
-        qDebug() << "MainWindow::loadProject(): Layer " << layer->name() << ", id=" << layer->id();
         layers << layer;
       }  
     }
 
     // --- 3. Restore Undo/Redo Stack ---
+    EditablePolygonCommand* editablePolyCommand = nullptr;
     QJsonArray undoArray = root["undoStack"].toArray();
     for ( const QJsonValue& v : undoArray ) {
         QJsonObject cmdObj = v.toObject();
@@ -346,6 +346,10 @@ bool MainWindow::loadProject( const QString& filePath, bool skipMainImage )
            cmd = PaintStrokeCommand::fromJson(cmdObj, layers);
         } else if ( type == "LassoCutCommand" ) {
            cmd = LassoCutCommand::fromJson(cmdObj, layers);
+           LassoCutCommand* cutCommand = dynamic_cast<LassoCutCommand*>(cmd);
+           if ( cutCommand != nullptr ) {
+             cutCommand->setController(editablePolyCommand);
+           }
         } else if ( type == "MoveLayer" ) {
            cmd = MoveLayerCommand::fromJson(cmdObj, layers);
         } else if ( type == "MirrorLayer" ) {
@@ -356,6 +360,7 @@ bool MainWindow::loadProject( const QString& filePath, bool skipMainImage )
            cmd = TransformLayerCommand::fromJson(cmdObj, layers);
         } else if ( type == "EditablePolygonCommand" ) {
            cmd = EditablePolygonCommand::fromJson(cmdObj, layers);
+           editablePolyCommand = dynamic_cast<EditablePolygonCommand*>(cmd);
         } else {
            qDebug() << "MainWindow::loadProject(): " << type << " not yet processed.";
         }
@@ -474,7 +479,7 @@ void MainWindow::toggleDocks()
 // --------------------------------- Layer tools ---------------------------------
 void MainWindow::toggleLayerVisibility(  QListWidgetItem* item )
 {
- std::cout << "MainWindow::toggleLayerVisibility(): Processing..." << std::endl;
+ // std::cout << "MainWindow::toggleLayerVisibility(): Processing..." << std::endl;
  {
     if ( !item ) return;
     if ( m_updatingLayerList ) return; // ⚡ verhindert Rekursion
@@ -497,12 +502,11 @@ void MainWindow::toggleLayerVisibility(  QListWidgetItem* item )
 
 void MainWindow::rebuildLayerList()
 {
-  std::cout << "MainWindow::rebuildLayerList(): Rebuild layer list..." << std::endl;
+  // std::cout << "MainWindow::rebuildLayerList(): Rebuild layer list..." << std::endl;
   {
     m_updatingLayerList = true;
     m_layerList->clear();
     const auto& layers = m_imageView->layers();
-    std::cout << "MainWindow::rebuildLayerList(): nLayers=" << layers.size() << std::endl;
     for ( int i = layers.size()-1; i >= 0; --i ) {
         Layer* layer = layers[i];
         if ( !layer || !layer->m_item ) continue;
@@ -878,6 +882,7 @@ QComboBox* MainWindow::buildDefaultColorComboBox( const QString& name )
       i += 1;
     }
     // --- disable ComboBox entries ---
+/*
     QStandardItemModel* model = qobject_cast<QStandardItemModel*>(colorComboBox->model());
     if ( model ) {
       for ( int i = 1; i < 10; ++i ) {
@@ -889,6 +894,7 @@ QComboBox* MainWindow::buildDefaultColorComboBox( const QString& name )
         }
        }
     }
+*/
     return colorComboBox;
 }
 

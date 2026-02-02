@@ -26,7 +26,7 @@ public:
     QJsonObject toJson() const override;
     static LassoCutCommand* fromJson( const QJsonObject& obj, const QList<LayerItem*>& layers, QUndoCommand* parent = nullptr );
     
-    
+    int layerId() const { return m_newLayerId; }
     void setController( QUndoCommand *undoCommand ) { m_controller = undoCommand; };
     void save_backup() {
       m_backup.save("/tmp/imageeditor_backuppic.png");

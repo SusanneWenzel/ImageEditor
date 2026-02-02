@@ -225,7 +225,7 @@ void ImageView::enablePipette( bool enabled ) {
 // ------------------------ ------------------------ ------------------------
 void ImageView::keyPressEvent( QKeyEvent* e )
 {
-  qDebug() << "ImageView::keyPressEvent(): key =" << e->key();
+  // qDebug() << "ImageView::keyPressEvent(): key =" << e->key();
   {
     if ( m_polygonEnabled && ( e->key() == Qt::Key_Return || e->key() == Qt::Key_Escape ) ) {
      setPolygonEnabled(false);
@@ -237,7 +237,7 @@ void ImageView::keyPressEvent( QKeyEvent* e )
 
 void ImageView::mousePressEvent( QMouseEvent* event )
 {
-  std::cout << "ImageView::mousePressEvent(): m_polygonEnabled=" << m_polygonEnabled << std::endl;
+  // std::cout << "ImageView::mousePressEvent(): m_polygonEnabled=" << m_polygonEnabled << std::endl;
   {
     if ( !scene() )
         return;     
@@ -367,7 +367,7 @@ void ImageView::mousePressEvent( QMouseEvent* event )
 
 void ImageView::mouseDoubleClickEvent( QMouseEvent* event )
 {
-  std::cout << "ImageView::mouseDoubleClickEvent(): Processing..." << std::endl;
+  // std::cout << "ImageView::mouseDoubleClickEvent(): Processing..." << std::endl;
   {
     QGraphicsView::mouseDoubleClickEvent(event);
   }
@@ -500,7 +500,7 @@ void ImageView::mouseMoveEvent( QMouseEvent* event )
 
 void ImageView::mouseReleaseEvent( QMouseEvent* event )
 {
-  std::cout << "ImageView::mouseReleaseEvent(): Processing..." << std::endl;
+  // std::cout << "ImageView::mouseReleaseEvent(): Processing..." << std::endl;
   {
     if ( !scene() )
         return;
@@ -743,9 +743,13 @@ LayerItem* ImageView::getSelectedItem()
     return nullptr;
 }
 
-
 void ImageView::setLayerOperationMode( LayerItem::OperationMode mode )
 {
+  // qDebug() << "ImageView::setLayerOperationMode(): mode =" << mode << ", m_polygonEnabled =" << m_polygonEnabled;
+  {
+    if ( m_polygonEnabled ) {
+      setPolygonEnabled(false);
+    }
     LayerItem *layer = getSelectedItem();
     if ( layer != nullptr ) {
       layer->setOperationMode(mode);
@@ -763,6 +767,7 @@ void ImageView::setLayerOperationMode( LayerItem::OperationMode mode )
         }
     }
    */
+  }
 }
 
 void ImageView::setNumberOfCageControlPoints( int nControlPoints ) 
@@ -821,7 +826,7 @@ void ImageView::createLassoLayer()
 
 LassoCutCommand* ImageView::createNewLayer( const QPolygonF& polygon, const QString &name )
 {
-  std::cout << "ImageView::createNewLayer(): name=" << name.toStdString() << ",  polygon_size=" << polygon.size() << std::endl;
+  // std::cout << "ImageView::createNewLayer(): name=" << name.toStdString() << ",  polygon_size=" << polygon.size() << std::endl;
   {
     // --- switch to layer operation mode ---
     MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_parent);
@@ -976,7 +981,7 @@ void ImageView::redoPolygonOperation()
 
 void ImageView::createPolygonLayer()
 {
-  std::cout << "ImageView::createPolygonLayer(): Processing..." << std::endl;
+  qDebug() << "ImageView::createPolygonLayer(): Processing...";
   {
     if ( m_activePolygon != nullptr ) {
       LayerItem *layer = baseLayer();
@@ -993,20 +998,20 @@ void ImageView::createPolygonLayer()
       return;
     EditablePolygon *editablePolygon = polyCmd->model();
     if ( editablePolygon != nullptr ) {
-     LassoCutCommand *layerCut = createNewLayer(editablePolygon->polygon(),"Polygon layer");
+     int index = m_layers.size()+1;
+     LassoCutCommand *layerCut = createNewLayer(editablePolygon->polygon(),QString("Polygon %1 layer").arg(index));
      if ( layerCut != nullptr ) {
-      layerCut->setController(layerCut);
+      layerCut->setController(polyCmd);
       editablePolygon->setVisible(false);
      }
-     // --- send signal to mainWindow ---
-     // emit lassoLayerAdded();
+     emit lassoLayerAdded();
     }
   }
 }
 
 void ImageView::finishPolygonDrawing( LayerItem* layer )
 {
-  std::cout << "ImageView::finishPolygonDrawing(): Processing..." << std::endl;
+  // std::cout << "ImageView::finishPolygonDrawing(): Processing..." << std::endl;
   {
     if ( !m_activePolygon || m_activePolygon->pointCount() < 3 )
         return;
@@ -1026,7 +1031,7 @@ void ImageView::finishPolygonDrawing( LayerItem* layer )
 
 void ImageView::setPolygonEnabled( bool enabled )
 { 
-  std::cout << "ImageView::setPolygonEnabled(): npolygons=" << m_editablePolygons.size() << ", enabled=" << enabled << std::endl;
+  // std::cout << "ImageView::setPolygonEnabled(): npolygons=" << m_editablePolygons.size() << ", enabled=" << enabled << std::endl;
   {
    LayerItem *layer = baseLayer();
    if ( layer != nullptr ) {

@@ -271,7 +271,7 @@ void LayerItem::paintStrokeSegment( const QPoint& p0, const QPoint& p1, const QC
 // ------------------------ Cage ------------------------
 void LayerItem::applyTriangleWarp()
 {
-  std::cout << "LayerItem::applyTriangleWarp(): meshActive=" << m_mesh.isActive() << ",  m_cageEnabled=" << m_cageEnabled << ", m_cageEditing=" << m_cageEditing << std::endl;
+  // std::cout << "LayerItem::applyTriangleWarp(): meshActive=" << m_mesh.isActive() << ",  m_cageEnabled=" << m_cageEnabled << ", m_cageEditing=" << m_cageEditing << std::endl;
   {
     TriangleWarp::WarpResult warped = TriangleWarp::warp(m_originalImage,m_mesh);
     if ( !warped.image.isNull() ) {
@@ -290,7 +290,7 @@ void LayerItem::applyCageWarp()
 
 void LayerItem::enableCage( int cols, int rows )
 {
-  std::cout << "LayerItem::enableCage(): cols=" << cols << ", rows=" << rows << ", enabled=" << m_cageEnabled << std::endl;
+  // std::cout << "LayerItem::enableCage(): cols=" << cols << ", rows=" << rows << ", enabled=" << m_cageEnabled << std::endl;
   {
    /* BETTER 
     if ( m_cageEnabled ) {
@@ -323,7 +323,7 @@ void LayerItem::enableCage( int cols, int rows )
 
 void LayerItem::initCage( const QVector<QPointF>& pts, const QRectF &rect, int nrows, int ncolumns )
 {
-  qDebug() << "LayerItem::initCage(): rect =" << rect << ", rows =" << nrows << ", ncolumns =" << ncolumns;
+  // qDebug() << "LayerItem::initCage(): rect =" << rect << ", rows =" << nrows << ", ncolumns =" << ncolumns;
   {
     m_mesh.create(rect,nrows,ncolumns);  
     m_mesh.setPoints(pts);
@@ -336,7 +336,7 @@ void LayerItem::initCage( const QVector<QPointF>& pts, const QRectF &rect, int n
 
 void LayerItem::disableCage()
 {
-  std::cout << "LayerItem::disableCage(): m_cageEditing=" << m_cageEditing << "|" << m_cageEnabled << " nControlPoints=" << m_mesh.pointCount() << std::endl;
+  // std::cout << "LayerItem::disableCage(): m_cageEditing=" << m_cageEditing << "|" << m_cageEnabled << " nControlPoints=" << m_mesh.pointCount() << std::endl;
   {
     if ( m_cageOverlay != nullptr ) {
      if ( m_parent != nullptr ) {
@@ -359,8 +359,8 @@ void LayerItem::disableCage()
 
 void LayerItem::setCageVisible( bool isVisible )
 {
-  std::cout << "LayerItem::setCageVisible(): isVisible=" << isVisible << std::endl;
-  m_mesh.printself();
+  // std::cout << "LayerItem::setCageVisible(): isVisible=" << isVisible << std::endl;
+  // m_mesh.printself();
   {
     if ( m_cageOverlay != nullptr ) {
       for ( int i = 0; i < m_handles.size(); ++i ) {
@@ -403,7 +403,7 @@ void LayerItem::updateCagePoint( TransformHandleItem* handle, const QPointF& loc
 
 void LayerItem::setCagePoint( int idx, const QPointF& pos )
 {
-  std::cout << "LayerItem::setCagePoint(): index=" << idx << ", pos=(" << pos.x() << ":" << pos.y() << ")..." << std::endl;
+  // std::cout << "LayerItem::setCagePoint(): index=" << idx << ", pos=(" << pos.x() << ":" << pos.y() << ")..." << std::endl;
   {
     QRectF bounds_before = QPolygonF(m_mesh.points()).boundingRect();
     QPointF local = mapFromScene(pos);
@@ -421,7 +421,7 @@ void LayerItem::setCagePoint( int idx, const QPointF& pos )
 
 void LayerItem::commitCageTransform( const QVector<QPointF> &cage )
 {
-  std::cout << "LayerItem::commitCageTransform(): Processing..." << std::endl;
+  // std::cout << "LayerItem::commitCageTransform(): Processing..." << std::endl;
   {
     if ( m_cage.size() < 4 || m_originalCage.size() < 4 )
         return;
@@ -438,7 +438,6 @@ void LayerItem::commitCageTransform( const QVector<QPointF> &cage )
 
 void LayerItem::beginCageEdit()
 {
-  std::cout << "LayerItem::beginCageEdit(): Processing..." << std::endl;
     m_cageEditing = true;
     m_startPos = pos();
     m_startTransform = transform();
@@ -446,7 +445,8 @@ void LayerItem::beginCageEdit()
 
 void LayerItem::endCageEdit( int idx, const QPointF& startPos )
 {
-  std::cout << "LayerItem::endCageEdit(): Processing..." << std::endl;
+  // std::cout << "LayerItem::endCageEdit(): Processing..." << std::endl;
+  {
     QVector<QPointF> cage;
     for ( int i=0 ; i<m_cage.size() ; i++ ) {
       cage.append(QPointF(m_cage[i].x(),m_cage[i].y()));
@@ -456,11 +456,12 @@ void LayerItem::endCageEdit( int idx, const QPointF& startPos )
     m_cageEditing = false;
    // if ( undoStack() && m_startTransform != transform() )
    //   undoStack()->push(new TransformLayerCommand(this, m_startPos, pos(), m_startTransform, transform()));
+  }
 }
 
 void LayerItem::setOperationMode( OperationMode mode ) 
 {
-   std::cout << "LayerItem::setOperationMode(): index=" << m_index << ", mode=" << m_operationMode << "|" << mode << std::endl;
+   // std::cout << "LayerItem::setOperationMode(): index=" << m_index << ", mode=" << m_operationMode << "|" << mode << std::endl;
    {
      if ( m_operationMode == mode )
       return;
@@ -475,7 +476,7 @@ void LayerItem::setOperationMode( OperationMode mode )
 // ------------------------ Mouse events ------------------------
 void LayerItem::mouseDoubleClickEvent( QGraphicsSceneMouseEvent* event )
 {
-  std::cout << "LayerItem::mouseDoubleClickEvent(): index=" << m_index << ", mode=" << m_operationMode << std::endl;
+  // std::cout << "LayerItem::mouseDoubleClickEvent(): index=" << m_index << ", mode=" << m_operationMode << std::endl;
   {
     if ( m_operationMode == OperationMode::CageWarp ) {
       if ( m_cageEnabled == false ) {
@@ -505,7 +506,7 @@ void LayerItem::mouseDoubleClickEvent( QGraphicsSceneMouseEvent* event )
 
 void LayerItem::mousePressEvent( QGraphicsSceneMouseEvent* event )
 {
-  std::cout << "LayerItem::mousePressEvent(): operationMode=" << m_operationMode << ", active=" << m_mouseOperationActive << std::endl;
+  // std::cout << "LayerItem::mousePressEvent(): operationMode=" << m_operationMode << ", active=" << m_mouseOperationActive << std::endl;
   {
     if ( event->button() != Qt::LeftButton ) {
      QGraphicsPixmapItem::mousePressEvent(event);
@@ -557,7 +558,7 @@ void LayerItem::mouseMoveEvent( QGraphicsSceneMouseEvent* event )
 
 void LayerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 {
-  std::cout << "LayerItem::mouseReleaseEvent(): index=" << m_index << ", name=" << name().toStdString() << std::endl;
+  // std::cout << "LayerItem::mouseReleaseEvent(): index=" << m_index << ", name=" << name().toStdString() << std::endl;
   {
     if ( !m_undoStack ) {
       QGraphicsPixmapItem::mouseReleaseEvent(event);
@@ -586,7 +587,8 @@ void LayerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
 // ------------------------ Handles ------------------------
 void LayerItem::updateHandles() 
 {
- std::cout << "LayerItem::updateHandles(): Processing..." << std::endl;
+  // std::cout << "LayerItem::updateHandles(): Processing..." << std::endl;
+  {
     qDeleteAll(m_handles);
     m_handles.clear();
     
@@ -610,4 +612,5 @@ void LayerItem::updateHandles()
     rot->setParentItem(this);
     rot->setPos(QPointF(r.center().x(), r.top() - 30));
     m_handles << rot;
+  }
 }

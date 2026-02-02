@@ -21,7 +21,7 @@ TransformLayerCommand::TransformLayerCommand( LayerItem* layer,
 
 // -------------------------------- Undo/Redo --------------------------------
 void TransformLayerCommand::undo() {
-  std::cout << "TransformLayerCommand::undo(): Processing..." << std::endl;
+  // std::cout << "TransformLayerCommand::undo(): Processing..." << std::endl;
   {
     if ( m_layer )
       m_layer->setImageTransform(m_oldTransform);
@@ -29,7 +29,7 @@ void TransformLayerCommand::undo() {
 }
 
 void TransformLayerCommand::redo() {
-  std::cout << "TransformLayerCommand::redo(): Processing..." << std::endl;
+  // std::cout << "TransformLayerCommand::redo(): Processing..." << std::endl;
   {
     if ( m_layer )
       m_layer->setImageTransform(m_newTransform);

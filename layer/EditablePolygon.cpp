@@ -18,7 +18,7 @@ EditablePolygon::EditablePolygon( const QString& name, QObject* parent )
     : QObject(parent)
      , m_name(name)
 {
-  std::cout << "EditablePolygon::EditablePolygon(): name=" << m_name.toStdString() << std::endl;
+  // std::cout << "EditablePolygon::EditablePolygon(): name=" << m_name.toStdString() << std::endl;
 }
 
 void EditablePolygon::setVisible( bool isVisible )
@@ -56,7 +56,7 @@ void EditablePolygon::smooth()
 // --- reduce number of points (Douglas-Peucker-Algorithmus) ---
 void EditablePolygon::reduce( qreal tolerance )
 {
-  std::cout << "EditablePolygon::reduce(): tolerance=" << tolerance << std::endl;
+  // std::cout << "EditablePolygon::reduce(): tolerance=" << tolerance << std::endl;
   {
     if ( m_polygon.size() > 3 ) {
       QPainterPath path;
@@ -160,7 +160,7 @@ QJsonArray EditablePolygon::undoStackToJson() const
 
 void EditablePolygon::undoStackFromJson( const QJsonArray& arr )
 {
-  std::cout << "EditablePolygon::undoStackFromJson(): Processing..." << std::endl;
+  // std::cout << "EditablePolygon::undoStackFromJson(): Processing..." << std::endl;
   {
     m_undoStack.clear();
     for ( const QJsonValue& v : arr ) {
@@ -179,7 +179,7 @@ void EditablePolygon::undoStackFromJson( const QJsonArray& arr )
         	cmd = PolygonSmoothCommand::fromJson(o, this);
         else if ( type == "ReducePolygon" )
         	cmd = PolygonReduceCommand::fromJson(o, this);
-        else if ( type == "PolygonTranslateCommand" )
+        else if ( type == "PolygonTranslate" )
         	cmd = PolygonTranslateCommand::fromJson(o, this);
         else if ( type == "PolygonSmooth" )
             cmd = PolygonSmoothCommand::fromJson(o, this);

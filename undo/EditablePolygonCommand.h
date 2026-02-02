@@ -18,6 +18,8 @@ public:
     QString type() const override { return "EditablePolygon"; }
     EditablePolygon* model() const { return m_model; }
     
+    void setVisible( bool isVisible );
+    
     void undo() override;
     void redo() override;
 

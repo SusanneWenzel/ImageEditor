@@ -1,4 +1,5 @@
 #include "LassoCutCommand.h"
+#include "EditablePolygonCommand.h"
 
 #include <QByteArray>
 #include <QJsonObject>
@@ -17,7 +18,7 @@ LassoCutCommand::LassoCutCommand( LayerItem* originalLayer, LayerItem* newLayer,
           m_backup(originalBackup),
           m_name(name)
 {
-  std::cout << "LassoCutCommand::LassoCutCommand(): Processing..." << std::endl;
+  // std::cout << "LassoCutCommand::LassoCutCommand(): Processing..." << std::endl;
   {
     newLayer->setPos(bounds.topLeft());
     m_originalLayerId = originalLayer->id();
@@ -29,7 +30,7 @@ LassoCutCommand::LassoCutCommand( LayerItem* originalLayer, LayerItem* newLayer,
 // ---------------------- Undo/Redo ----------------------
 void LassoCutCommand::undo()
 {
-  std::cout << "LassoCutCommand::redo(): Processing..." << std::endl;
+  // std::cout << "LassoCutCommand::undo(): Processing..." << std::endl;
   {
     QImage tempImage = m_originalLayer->image();
     QPainter p(&tempImage);
@@ -46,14 +47,20 @@ void LassoCutCommand::undo()
     m_originalLayer->update();
     if ( m_newLayer->scene() ) {
       m_newLayer->scene()->removeItem(m_newLayer);
-    }     
+    }  
+    if ( m_controller != nullptr ) {
+     EditablePolygonCommand* editablePolyCommand = dynamic_cast<EditablePolygonCommand*>(m_controller);
+     if ( editablePolyCommand != nullptr ) {
+      editablePolyCommand->setVisible(true);
+     }
+    }
     m_newLayer->setVisible(false);
   }
 }
     
 void LassoCutCommand::redo()
 {
-  std::cout << "LassoCutCommand::redo(): Processing..." << std::endl;
+  // std::cout << "LassoCutCommand::redo(): Processing..." << std::endl;
   {
     QColor color = QColor(255,255,255);
     QImage tempImage = m_originalLayer->image();
@@ -68,14 +75,15 @@ void LassoCutCommand::redo()
     m_originalLayer->setImage(tempImage);
     if ( !m_newLayer->scene() && m_originalLayer->scene() ) {
       m_originalLayer->scene()->addItem(m_newLayer);
-    } else {
-     /*
-     std::cerr << "LassoCutCommand::redo(): No valid scene data available." << std::endl;
-     std::cerr << " newLayerScene=" << ( m_newLayer->scene() ? 1 : 0 ) << std::endl;
-     std::cerr << " originalLayerScene=" << ( m_originalLayer->scene() ? 1 : 0 ) << std::endl;
-     */
     }
     m_newLayer->setVisible(true);
+    // controller handling
+    if ( m_controller != nullptr ) {
+     EditablePolygonCommand* editablePolyCommand = dynamic_cast<EditablePolygonCommand*>(m_controller);
+     if ( editablePolyCommand != nullptr ) {
+      editablePolyCommand->setVisible(false);
+     }
+    }
     m_originalLayer->update();
   }
 }
@@ -99,7 +107,7 @@ QJsonObject LassoCutCommand::toJson() const
 
 LassoCutCommand* LassoCutCommand::fromJson( const QJsonObject& obj, const QList<LayerItem*>& layers, QUndoCommand* parent )
 {
-  std::cout << "LassoCutCommand::fromJson(): Processing..." << std::endl;
+  // std::cout << "LassoCutCommand::fromJson(): Processing..." << std::endl;
   {
     // Original Layer
     const int originalLayerId = obj["originalLayerId"].toInt(-1);

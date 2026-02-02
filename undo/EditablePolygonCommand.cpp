@@ -11,7 +11,7 @@ EditablePolygonCommand::EditablePolygonCommand( LayerItem *layer, QGraphicsScene
     , m_polygon(polygon)
     , m_name(name)
 {
-  std::cout << "EditablePolygonCommand::EditablePolygonCommand(): name=" << name.toStdString() << std::endl;
+  // std::cout << "EditablePolygonCommand::EditablePolygonCommand(): name=" << name.toStdString() << std::endl;
   setText(QString("Editable %1").arg(name));
   m_model = new EditablePolygon(m_name);
   m_model->setPolygon(m_polygon);
@@ -19,9 +19,19 @@ EditablePolygonCommand::EditablePolygonCommand( LayerItem *layer, QGraphicsScene
 }
 
 // ------------------------ Methods ------------------------
+void EditablePolygonCommand::setVisible( bool isVisible )
+{
+  // qDebug() << "EditablePolygonCommand::setVisible(): isVisible=" << isVisible;
+  {
+    if ( m_model != nullptr ) {
+      m_model->setVisible(isVisible);
+    }
+  }
+}
+
 void EditablePolygonCommand::redo()
 {
-   qDebug() << "EditablePolygonCommand::redo(): Processing...";
+   // qDebug() << "EditablePolygonCommand::redo(): Processing...";
    {
     if ( !m_model ) {
         m_model = new EditablePolygon(m_name);
@@ -36,7 +46,7 @@ void EditablePolygonCommand::redo()
 
 void EditablePolygonCommand::undo()
 {
-  qDebug() << "EditablePolygonCommand::undo(): Processing...";
+  // qDebug() << "EditablePolygonCommand::undo(): Processing...";
   {
     if ( m_item && m_item->scene() )
         m_scene->removeItem(m_item);
@@ -65,7 +75,7 @@ QJsonObject EditablePolygonCommand::toJson() const
 EditablePolygonCommand* EditablePolygonCommand::fromJson( const QJsonObject& obj, const QList<LayerItem*>& layers,
                                                      QGraphicsScene* scene )
 {
-  std::cout << "EditablePolygonCommand::fromJson(): Processing..." << std::endl;
+  // std::cout << "EditablePolygonCommand::fromJson(): Processing..." << std::endl;
   {
     QString name = obj.value("name").toString("Unknown");
     const int layerId = obj["layerId"].toInt(-1);

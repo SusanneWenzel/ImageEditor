@@ -40,7 +40,6 @@ static void saveCurrentCall( int argc, char *argv[] ) {
   // std::cout << "saveCurrentCall(): Processing..." << std::endl;
   {
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    std::cout << " path=" << path.toStdString() << std::endl;
     QDir().mkpath(path); 
     QString filePath = path + "/history.json";
     QFile file(filePath);
