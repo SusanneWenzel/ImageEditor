@@ -23,8 +23,10 @@ The ImageEditor application requires **Qt6**. Below is a list of Linux distribut
 | :--- | :--- | :--- | :--- |
 | **Ubuntu 24.10** | Oracular Oriole | ✅ Supported | Qt 6.6.x |
 | **Ubuntu 24.04 LTS**| Noble Numbat | ✅ Supported | Qt 6.4.x |
-| **Ubuntu 22.04 LTS**| Jammy Jellyfish | ✅ Supported | Qt 6.2.4 |
+| **Ubuntu 22.04 LTS**| Jammy Jellyfish | ✅ Supported [^1] | Qt 6.2.4 |
 | **Ubuntu 20.04 LTS**| Focal Fossa | ❌ No | (Qt 5 only) |
+
+[^1]: This version of QT seems to be missing some functionality used in the precompiled version
 
 ### Supported Debian Versions
 | Debian Version | Release Name | Qt6 Support | Native Repo Version |
