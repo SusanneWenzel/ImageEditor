@@ -1,5 +1,9 @@
 #include "AbstractCommand.h"
 
+// >>>
+#include <QApplication>
+#include <QCoreApplication>
+
 // Include of all relevant commands
 #include "CageWarpCommand.h"
 #include "MoveLayerCommand.h"
@@ -87,10 +91,13 @@ LayerItem* AbstractCommand::getLayerItem( const QList<LayerItem*>& layers, int l
 
 QIcon AbstractCommand::getIconFromSvg( const QByteArray &svgData ) 
 {
+  if ( qobject_cast<QApplication*>(qApp) ) {
     QSvgRenderer renderer(svgData);
     QPixmap pixmap(64, 64);
     pixmap.fill(Qt::transparent);
     QPainter painter(&pixmap);
     renderer.render(&painter);
     return QIcon(pixmap);
+  }
+  return QIcon();
 }
