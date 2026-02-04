@@ -2,7 +2,7 @@ use strict;
 
 my $program = "../build/ImageEditor --batch";
 
-print "Select batch job [1-6]: ";
+print "Select batch job [1]: ";
 my $batchId = <STDIN>;
 chomp($batchId);
 
