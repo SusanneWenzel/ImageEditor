@@ -17,6 +17,7 @@ public:
 
     QString type() const override { return "DeletePolygonPoint"; }
     LayerItem* layer() const override { return nullptr; }
+    int id() const override { return 1010; }
     
     void undo() override;
     void redo() override;

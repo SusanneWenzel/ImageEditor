@@ -11,14 +11,11 @@ class MoveLayerCommand : public AbstractCommand
 
 public:
 
-    MoveLayerCommand( LayerItem* layer, const QPointF& oldPos, const QPointF& newPos, const int idx=0, QUndoCommand* parent = nullptr )
-        : AbstractCommand(parent), m_layer(layer), m_oldPos(oldPos), m_newPos(newPos), m_layerId(idx)
-    {
-        setText(QString("Move Layer %1").arg(idx));
-    }
+    MoveLayerCommand( LayerItem* layer, const QPointF& oldPos, const QPointF& newPos, const int idx=0, QUndoCommand* parent = nullptr );
     
     QString type() const override { return "MoveLayer"; }
     LayerItem* layer() const override { return m_layer; }
+    int id() const override { return 1005; }
     
     void undo() override;
     void redo() override;

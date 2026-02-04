@@ -21,6 +21,7 @@ public:
     void setVisible( bool isVisible );
     
     LayerItem* layer() const override { return m_layer; }
+    int id() const override { return 1000; }
     
     void undo() override;
     void redo() override;

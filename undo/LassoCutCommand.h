@@ -25,6 +25,8 @@ public:
     
     LayerItem* layer() const override { return m_newLayer; }
     
+    int id() const override { return 1001; }
+    
     QJsonObject toJson() const override;
     static LassoCutCommand* fromJson( const QJsonObject& obj, const QList<LayerItem*>& layers, QUndoCommand* parent = nullptr );
     

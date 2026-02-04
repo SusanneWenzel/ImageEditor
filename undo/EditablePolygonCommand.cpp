@@ -11,11 +11,21 @@ EditablePolygonCommand::EditablePolygonCommand( LayerItem *layer, QGraphicsScene
     , m_polygon(polygon)
     , m_name(name)
 {
-  // std::cout << "EditablePolygonCommand::EditablePolygonCommand(): name=" << name.toStdString() << std::endl;
+  // qDebug() << "EditablePolygonCommand::EditablePolygonCommand(): name=" << name;
   setText(QString("Editable %1").arg(name));
   m_model = new EditablePolygon(m_name);
   m_model->setPolygon(m_polygon);
   m_item = new EditablePolygonItem(m_model,m_layer);
+  QByteArray polygonSvg = 
+      "<svg viewBox='0 0 64 64'>"
+      "<path d='M15 15 L50 20 L45 50 L10 40 Z' "
+      "fill='none' stroke='white' stroke-width='3' stroke-dasharray='4,3' stroke-linejoin='round'/>"
+      "<circle cx='15' cy='15' r='3' fill='white'/>"
+      "<circle cx='50' cy='20' r='3' fill='white'/>"
+      "<circle cx='45' cy='50' r='3' fill='white'/>"
+      "<circle cx='10' cy='40' r='3' fill='white'/>"
+      "</svg>";
+  setIcon(AbstractCommand::getIconFromSvg(polygonSvg));
 }
 
 // ------------------------ Methods ------------------------

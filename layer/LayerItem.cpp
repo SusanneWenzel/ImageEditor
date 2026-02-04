@@ -95,10 +95,11 @@ void LayerItem::printself( bool debugSave )
   qInfo() << " LayerItem::printself(): name=" << name() << ", id=" << m_index << ", visible=" << isVisible();
   QRectF rect = m_nogui ? m_image.rect() : boundingRect();
   QString geometry = QString("%1x%2+%3+%4").arg(rect.width()).arg(rect.height()).arg(pos().x()).arg(pos().y());
-  std::cout << "  + geometry=" << geometry.toStdString() << std::endl;
-  std::cout << "  + cage: enabled=" << m_cageEnabled << ", edited=" << m_cageEditing << std::endl;
-  std::cout << "  + op mode=" << m_operationMode << std::endl;
-  std::cout << "  + bounding box=" << m_showBoundingBox << std::endl;
+  qInfo() << "  + position =" << pos();
+  qInfo() << "  + geometry=" << geometry;
+  qInfo() << "  + cage: enabled=" << m_cageEnabled << ", edited=" << m_cageEditing;
+  qInfo() << "  + op mode=" << m_operationMode;
+  qInfo() << "  + bounding box=" << m_showBoundingBox;
   
   if ( debugSave && m_index == 1 ) {
    std::cout << " LayerItem::printself(): Saving image data... " << std::endl;
@@ -215,11 +216,15 @@ void LayerItem::setImageTransform( const QTransform& transform, bool combine ) {
     }
     // *** hard QImage transformation ***
     qDebug() << " + alternative process for case where no pixmap is available...";
+    
+     m_originalImage.save("/tmp/layeritem_originalimage.png");
+     m_image.save("/tmp/layeritem_actualimage.png");
+    
     // transform image
     QPointF sceneCenter = mapToScene(QRectF(pixmap().rect()).center());
     QPointF imageCenter = QRectF(m_originalImage.rect()).center();
     m_totalTransform.translate(imageCenter.x(), imageCenter.y());
-    m_totalTransform *= transform; // This is your rotation
+    m_totalTransform *= transform; // This is my actual rotation
     m_totalTransform.translate(-imageCenter.x(), -imageCenter.y());
     m_image = m_originalImage.transformed(m_totalTransform, Qt::SmoothTransformation);
     QPointF newImageCenter(m_image.width() / 2.0, m_image.height() / 2.0);
@@ -586,9 +591,10 @@ void LayerItem::mouseReleaseEvent( QGraphicsSceneMouseEvent* event )
     } else if ( m_operationMode == OperationMode::Rotate || m_operationMode == OperationMode::Scale ) {
         if ( transform() != m_startTransform ) {
             QString name = m_operationMode == OperationMode::Rotate ? "Rotate Layer" : "Scale Layer";
+            TransformLayerCommand::LayerTransformType trafoType = OperationMode::Rotate ? TransformLayerCommand::LayerTransformType::Rotate : TransformLayerCommand::LayerTransformType::Scale;
             name += QString(" %1").arg(m_index);
             m_undoStack->push(
-                new TransformLayerCommand(this, m_startPos, pos(), m_startTransform, transform(), name)
+                new TransformLayerCommand(this, m_startPos, pos(), m_startTransform, transform(), name, trafoType)
             );
         }
     }

@@ -13,12 +13,16 @@
 #include "../undo/MoveLayerCommand.h"
 #include "../undo/CageWarpCommand.h"
 
+#include "../util/ItemDelegate.h"
+
 #ifdef HASITK
  #include <itkImage.h>
  #include <itkImageFileReader.h>
  #include <itkRescaleIntensityImageFilter.h>
 #endif 
 
+#include <QCloseEvent>
+#include <QMessageBox>
 #include <QStyledItemDelegate>
 #include <QStandardItemModel>
 #include <QJsonDocument>
@@ -65,7 +69,7 @@ static QBrush createCheckerBrush( int tileSize=16, QColor c1=QColor("#3a3a3a"), 
 MainWindow::MainWindow( const QString& imagePath, const QString& historyPath, bool useVulkan, QWidget* parent )
     : QMainWindow(parent)
 {
-  // std::cout << "MainWindow::MainWindow(): imagePath=" << imagePath.toStdString() << ", projectPath=" << historyPath.toStdString() << std::endl;
+  // qDebug() << "MainWindow::MainWindow(): imagePath=" << imagePath << ", projectPath=" << historyPath;
   {
     // setup Gimp style
     // QCoreApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles);
@@ -87,8 +91,12 @@ MainWindow::MainWindow( const QString& imagePath, const QString& historyPath, bo
       QComboBox QAbstractItemView { background-color: #2a2a2a; selection-background-color: #505050; }
       QComboBox:item:disabled { color: gray; font-style: italic; }
     )");
-    setWindowTitle("Image Viewer - "+imagePath);
-
+    if ( imagePath == "" ) {
+      setWindowTitle("ImageEditor - "+historyPath); 
+    } else {
+      setWindowTitle("ImageEditor - "+imagePath); 
+    }
+    
     // >>>
     m_imageView = new ImageView(this);
     m_imageView->setStyleSheet("QGraphicsView { border: none; }");
@@ -115,11 +123,28 @@ MainWindow::MainWindow( const QString& imagePath, const QString& historyPath, bo
   }    
 }
 
+// ---------------------- Catch close/exit event ----------------------
+void MainWindow::closeEvent( QCloseEvent *event ) 
+{
+    if ( !m_imageView->undoStack()->isClean() ) {
+        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "ImageEditor",
+                            tr("There are unsaved changes.\nDo you really want to quit the program?"),
+                            QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,QMessageBox::Yes);
+        if ( resBtn != QMessageBox::Yes )  {
+            event->ignore();
+        } else {
+            event->accept();
+        }
+    } else {
+        event->accept();
+    }
+}
+
 // ---------------------- Load and Save ----------------------
 // -> m_imageView->getScene()->addItem(m_layerItem);
 bool MainWindow::loadImage( const QString& filePath )
 {
-  // std::cout << "MainWindow::loadImage(): filePath=" << filePath.toStdString() << std::endl;
+  // qDebug() << "MainWindow::loadImage(): filePath=" << filePath;
   {
     ImageLoader loader;
     if ( !loader.load(filePath) ) {
@@ -255,6 +280,10 @@ bool MainWindow::saveProject( const QString& filePath )
     if (!f.open(QIODevice::WriteOnly)) return false;
     f.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
     f.close();
+    
+    // --- 5. set clean flag in undo stack ---
+    m_imageView->undoStack()->setClean();
+    
     return true;
 }
 
@@ -369,6 +398,9 @@ bool MainWindow::loadProject( const QString& filePath, bool skipMainImage )
             undoStack->push(cmd);
     }
     
+    // --- 4. set clean flag in undo stack ---
+    m_imageView->undoStack()->setClean();
+    
     return true;
   }
 }
@@ -449,7 +481,44 @@ void MainWindow::createDockWidgets()
 
    // history dock
    m_undoView = new QUndoView(m_imageView->undoStack());
+   m_undoView->setContextMenuPolicy(Qt::CustomContextMenu);
+   m_undoView->setItemDelegate(new DarkHistoryDelegate(m_undoView));
    m_undoView->setWindowTitle("History");
+   m_undoView->setStyleSheet("QUndoView { background-color: #1e1e1e; border: none; }");
+ 
+ #ifdef TTT  
+   m_undoView->setStyleSheet(
+      /* Gesamtansicht */
+      "QUndoView {"
+      "   background-color: #1e1e1e;" // Dunkles Anthrazit
+      "   color: #e0e0e0;"            // Hellgraue Schrift für gute Lesbarkeit
+      "   border: 1px solid #333333;"
+      "   outline: none;"             // Entfernt den Fokus-Rahmen
+      "}"
+      /* Einzelne Einträge */
+      "QUndoView::item {"
+      "   padding: 6px 10px;"
+      "   border-bottom: 1px solid #2d2d2d;"
+      "}"
+      /* Die "Zukunft" (Rückgängig gemachte Befehle) */
+      "QUndoView::item:!enabled {"
+      "   color: #555555;"           
+      "   background-color: #1a1a1a;" 
+      "   font-style: italic;"
+      "}"
+      /* Hover-Effekt (Maus fährt drüber) */
+      "QUndoView::item:hover {"
+      "   background-color: #333333;"
+      "}"
+      /* Der aktuell ausgewählte/aktive Stand */
+      "QUndoView::item:selected {"
+      "   background-color: #094771;" // Dunkelblaues Highlight
+      "   color: #ffffff;"
+      "   border-left: 3px solid #007acc;" // Akzent-Linie links
+      "}"
+   );
+ #endif
+ 
    // m_undoView->setAlternatingRowColors(true);
    m_historyDock = new QDockWidget("Undo History", this);
    m_historyDock->setWidget(m_undoView);
@@ -460,9 +529,30 @@ void MainWindow::createDockWidgets()
    m_historyDock->hide();
    connect(m_undoView, &QUndoView::activated, this, [this](const QModelIndex &index){
      int i = index.row();
-     std::cout << "MainWindow::createDockWidgets(): index=" << i << std::endl;
      m_imageView->undoStack()->setIndex(i);
    });
+   connect(m_undoView, &QUndoView::customContextMenuRequested, this, [this](const QPoint &pos) {
+    QModelIndex index = m_undoView->indexAt(pos);
+    if ( !index.isValid() ) return;
+    QMenu menu(this);
+    QAction *jumpAction = menu.addAction(tr("Jump back to this point"));
+    QAction *renameAction = menu.addAction(tr("Rename..."));
+    QAction *selectedAction = menu.exec(m_undoView->mapToGlobal(pos));
+    if ( selectedAction == jumpAction ) {
+        m_imageView->undoStack()->setIndex(index.row()); 
+    } else if ( selectedAction == renameAction ) {
+        QUndoCommand *cmd = const_cast<QUndoCommand*>(m_imageView->undoStack()->command(index.row() - 1));
+        bool ok;
+        QString newText = QInputDialog::getText(this, tr("Rename command"),
+                                                 tr("New name:"), QLineEdit::Normal,
+                                                 cmd->text(), &ok);
+        if ( ok && !newText.isEmpty() ) {
+            cmd->setText(newText);
+            m_undoView->viewport()->update();
+        }
+    }
+   });
+   
 }
 
 void MainWindow::toggleDocks() 
@@ -597,14 +687,15 @@ void MainWindow::showLayerContextMenu( const QPoint& pos )
         QSize pixmapSize;
         if ( auto pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(layer->m_item) )
             pixmapSize = pixmapItem->pixmap().size();
-        qDebug() << "Layer Info:";
-        qDebug() << "Name:" << layer->name();
-        qDebug() << "Visible:" << layer->m_visible;
-        qDebug() << "Linked to Image:" << layer->m_linkedToImage;
-        qDebug() << "Bounding Box:" << bbox;
-        qDebug() << "Polygon Points:" << polygonPoints;
+        qInfo() << "Layer Info:";
+        qInfo() << " Name:" << layer->name();
+        qInfo() << " Visible:" << layer->m_visible;
+        qInfo() << " Linked to Image:" << layer->m_linkedToImage;
+        qInfo() << " Bounding Box:" << bbox;
+        qInfo() << " Position:" << layer->m_item->pos();
+        qInfo() << " Polygon Points:" << polygonPoints;
         if ( !pixmapSize.isEmpty() )
-            qDebug() << "Pixmap Size:" << pixmapSize;
+            qInfo() << " Pixmap Size:" << pixmapSize;
     });
     menu.exec(m_layerList->viewport()->mapToGlobal(pos));
 }

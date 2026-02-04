@@ -17,6 +17,14 @@ CageWarpCommand::CageWarpCommand( LayerItem* layer,
 {
     m_layerId = layer->id();
     setText(QString("Cage Warp %1").arg(m_layerId));
+    QByteArray warpLayerSvg = 
+      "<svg viewBox='0 0 64 64'>"
+      "<path d='M12 12 C25 18 39 18 52 12 M12 32 C25 38 39 38 52 32 M12 52 C25 58 39 58 52 52 "
+      "M12 12 C18 25 18 39 12 52 M32 12 C38 25 38 39 32 52 M52 12 C58 25 58 39 52 52' "
+      "fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'/>"
+      "<circle cx='32' cy='32' r='3' fill='#007acc'/>"
+      "</svg>";
+   setIcon(AbstractCommand::getIconFromSvg(warpLayerSvg));
 }
 
 // 

@@ -6,17 +6,50 @@
 // -------------------------------- Constructor --------------------------------
 TransformLayerCommand::TransformLayerCommand( LayerItem* layer,
     const QPointF& oldPos, const QPointF& newPos, const QTransform& oldTransform,
-    const QTransform& newTransform, const QString& name, QUndoCommand* parent )
-    : AbstractCommand(parent),
-      m_layer(layer), 
-      m_oldPos(oldPos), 
-      m_newPos(newPos), 
-      m_oldTransform(oldTransform), 
-      m_newTransform(newTransform),
-      m_name(name)
+    const QTransform& newTransform, const QString& name, const LayerTransformType& trafoType, QUndoCommand* parent )
+    : AbstractCommand(parent)
+      , m_layer(layer)
+      , m_oldPos(oldPos)
+      , m_newPos(newPos)
+      , m_oldTransform(oldTransform)
+      , m_newTransform(newTransform)
+      , m_name(name)
+      , m_trafoType(trafoType)
 {
     m_layerId = layer->id();
     setText(name);
+    if ( m_trafoType == LayerTransformType::Rotate ) {
+      QByteArray rotateLayerSvg = 
+         "<svg viewBox='0 0 64 64'>"
+         "<path d='M32 12 C43.05 12 52 20.95 52 32 C52 43.05 43.05 52 32 52 C20.95 52 12 43.05 12 32 C12 26.5 14.2 21.5 17.8 17.8' "
+         "fill='none' stroke='white' stroke-width='4' stroke-linecap='round'/>"
+         "<path d='M10 18 H18 V10' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/>"
+         "</svg>";
+      setIcon(AbstractCommand::getIconFromSvg(rotateLayerSvg));
+    } else {
+      QByteArray scaleLayerSvg = 
+         "<svg viewBox='0 0 64 64'>"
+         "<rect x='12' y='12' width='40' height='40' fill='none' stroke='white' stroke-width='2' stroke-dasharray='4,2'/>"
+         "<path d='M42 12 H52 V22 M52 52 L38 38 M12 42 V52 H22' "
+         "fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/>"
+         "<rect x='48' y='8' width='8' height='8' fill='white'/>"
+         "<rect x='8' y='48' width='8' height='8' fill='white'/>"
+         "</svg>";
+      setIcon(AbstractCommand::getIconFromSvg(scaleLayerSvg));
+    } 
+}
+
+// -------------------------------- Merge transforms --------------------------------
+bool TransformLayerCommand::mergeWith( const QUndoCommand *other ) 
+{
+  qDebug() << "TransformLayerCommand::mergeWith(): Processing...";
+  {
+    if ( other->id() != id() ) return false;
+    const TransformLayerCommand *otherCmd = static_cast<const TransformLayerCommand*>(other);
+    if ( m_layer != otherCmd->m_layer || otherCmd->trafoType() != trafoType() ) return false; 
+    m_newTransform *= otherCmd->m_newTransform;
+    return true;
+  }
 }
 
 // -------------------------------- Undo/Redo --------------------------------
@@ -24,6 +57,7 @@ void TransformLayerCommand::undo() {
   qDebug() << "TransformLayerCommand::undo(): m_oldTransform =" << m_oldTransform;
   {
     if ( m_layer )
+      m_layer->resetTotalTransform();
       m_layer->setImageTransform(m_oldTransform);
   }
 }
@@ -45,6 +79,7 @@ QJsonObject TransformLayerCommand::toJson() const
     obj["type"] = "TransformLayerCommand";
     obj["layerId"] = m_layer ? m_layer->id() : -1;
     obj["name"] = m_name;
+    obj["trafoType"] = m_trafoType == LayerTransformType::Rotate ? "rotate" : "scale";
     
     // points
     QJsonObject oldPointObj;
@@ -68,7 +103,6 @@ QJsonObject TransformLayerCommand::toJson() const
     newTransformObj["m31"] = m_newTransform.m31(); newTransformObj["m32"] = m_newTransform.m32(); newTransformObj["m33"] = m_newTransform.m33();
     obj["newTransform"] = newTransformObj;
     
-
     return obj; 
 }
 
@@ -90,6 +124,7 @@ TransformLayerCommand* TransformLayerCommand::fromJson( const QJsonObject& obj, 
     
     // core
     QString name = obj.value("name").toString("Unknown");
+    LayerTransformType trafoType = obj.value("name").toString("Unknown") == "scale" ? LayerTransformType::Scale : LayerTransformType::Rotate;
     
     // points
     QJsonObject oldPointObj = obj["oldPosition"].toObject();
@@ -118,6 +153,7 @@ TransformLayerCommand* TransformLayerCommand::fromJson( const QJsonObject& obj, 
         newPos,
         oldTransform,
         newTransform,
-        name
+        name,
+        trafoType
     );
 }

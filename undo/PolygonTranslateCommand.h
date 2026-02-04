@@ -14,6 +14,7 @@ public:
 
     QString type() const override { return "TranslatePolygon"; }
     LayerItem* layer() const override { return nullptr; }
+    int id() const override { return 1008; }
     
     void undo() override;
     void redo() override;

@@ -4,6 +4,21 @@
 #include <QtMath>
 #include <QDebug>
 
+// -------------- Constructor --------------
+MoveLayerCommand::MoveLayerCommand( LayerItem* layer, const QPointF& oldPos, const QPointF& newPos, const int idx, QUndoCommand* parent )
+        : AbstractCommand(parent), m_layer(layer), m_oldPos(oldPos), m_newPos(newPos), m_layerId(idx)
+{
+    setText(QString("Move Layer %1").arg(idx));
+    QByteArray moveLayerSvg = 
+      "<svg viewBox='0 0 64 64'>"
+      "<path d='M32 12 V52 M12 32 H52 M32 12 L26 18 M32 12 L38 18 "
+      "M32 52 L26 46 M32 52 L38 46 M12 32 L18 26 M12 32 L18 38 "
+      "M52 32 L46 26 M52 32 L46 38' "
+      "fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/>"
+      "</svg>";
+    setIcon(AbstractCommand::getIconFromSvg(moveLayerSvg));
+}
+
 // -------------- Undo / redo  -------------- 
 void MoveLayerCommand::undo() 
 { 

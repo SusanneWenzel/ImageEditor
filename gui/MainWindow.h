@@ -27,6 +27,10 @@ public:
     ImageView* getViewer() const { return m_imageView; }
     int getNumberOfCageControlPoints() const { return m_cageControlPointsSpin->value(); }
     void setMainOperationMode( MainOperationMode = ImageLayer );
+    
+protected:
+
+    void closeEvent( QCloseEvent *event ) override;
 
 private slots:
 

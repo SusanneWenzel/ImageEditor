@@ -23,7 +23,15 @@ LassoCutCommand::LassoCutCommand( LayerItem* originalLayer, LayerItem* newLayer,
     newLayer->setPos(bounds.topLeft());
     m_originalLayerId = originalLayer->id();
     m_newLayerId = newLayer->id(); 
-    setText(QString("%1 Cut").arg(name));
+    setText(QString("%1 Cut").arg(name));    
+    QByteArray rectSelectionSvg = 
+      "<svg viewBox='0 0 64 64'>"
+      "<rect x='10' y='14' width='44' height='36' "
+      "fill='none' stroke='white' stroke-width='3' stroke-dasharray='6,4' stroke-linejoin='round'/>"
+      "<path d='M10 24 V14 H20 M44 14 H54 V24 M54 40 V50 H44 M20 50 H10 V40' "
+      "fill='none' stroke='white' stroke-width='3' stroke-linecap='round'/>"
+      "</svg>";
+    setIcon(AbstractCommand::getIconFromSvg(rectSelectionSvg));
   }
 }
 

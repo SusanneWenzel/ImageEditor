@@ -21,6 +21,7 @@ public:
     void redo() override;
     
     LayerItem* layer() const override { return m_layer; }
+    int id() const override { return 1003; }
     
     QJsonObject toJson() const override;
     static InvertLayerCommand* fromJson( const QJsonObject& obj, const QList<LayerItem*>& layers );

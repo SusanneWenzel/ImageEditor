@@ -64,6 +64,11 @@ ImageView::ImageView( QWidget* parent ) : QGraphicsView(parent),
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     setDragMode(QGraphicsView::NoDrag);
     m_undoStack = new QUndoStack(this);
+    connect(m_undoStack, &QUndoStack::cleanChanged, this, [this](bool isClean){
+      setWindowModified(!isClean);
+      setWindowTitle(QString("Mein Editor[*]"));
+    });
+    
    /** 
     setDragMode(QGraphicsView::NoDrag);
     setMouseTracking(true);
@@ -819,8 +824,7 @@ void ImageView::clearLayers()
 
 void ImageView::createLassoLayer()
 {
-  createNewLayer(m_lassoPolygon,"Lasso layer");
-  // --- send signal to mainWindow ---
+  createNewLayer(m_lassoPolygon,"Lasso Layer");
   emit lassoLayerAdded();
 }
 

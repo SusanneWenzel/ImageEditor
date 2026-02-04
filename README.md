@@ -45,7 +45,7 @@ To set up the development environment on a supported Debian or Ubuntu system, ru
 sudo apt update
 
 # Install Qt6 base development files
-sudo apt install qt6-base-dev qt6-declarative-dev
+sudo apt install qt6-base-dev qt6-declarative-dev qt6-svg-dev
 
 # Optional: Install build tools if not present
 sudo apt install build-essential cmake

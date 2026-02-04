@@ -18,6 +18,7 @@ public:
     }
     
     LayerItem* layer() const override { return m_layer; }
+    int id() const override { return 1006; }
     
     QString type() const override { return "MirrorLayer"; }
     void undo() override { if ( m_layer ) m_layer->setMirror(m_mirrorPlane); }

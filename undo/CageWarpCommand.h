@@ -23,6 +23,7 @@ public:
     void redo() override;
     
     LayerItem* layer() const override { return m_layer; }
+    int id() const override { return 1002; }
     
     QJsonObject toJson() const override;
     static CageWarpCommand* fromJson( const QJsonObject& obj, const QList<LayerItem*>& layers, QUndoCommand* parent = nullptr );

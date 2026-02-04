@@ -12,9 +12,11 @@
 // >>>
 #include <QDebug>
 
+// -------------------- Constructor --------------------
 AbstractCommand::AbstractCommand( QUndoCommand* parent )
     : QUndoCommand(parent)
 {
+  m_timestamp = QDateTime::currentDateTime();
 }
 
 /**
@@ -68,7 +70,9 @@ AbstractCommand* AbstractCommand::fromJson( const QJsonObject& obj, const QList<
 }
 
 /**
+ * static member
  */
+ 
 LayerItem* AbstractCommand::getLayerItem( const QList<LayerItem*>& layers, int layerId )
 {
     LayerItem* layer = nullptr;
@@ -79,4 +83,14 @@ LayerItem* AbstractCommand::getLayerItem( const QList<LayerItem*>& layers, int l
         }
     }
     return layer;
+}
+
+QIcon AbstractCommand::getIconFromSvg( const QByteArray &svgData ) 
+{
+    QSvgRenderer renderer(svgData);
+    QPixmap pixmap(64, 64);
+    pixmap.fill(Qt::transparent);
+    QPainter painter(&pixmap);
+    renderer.render(&painter);
+    return QIcon(pixmap);
 }
