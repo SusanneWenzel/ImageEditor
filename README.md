@@ -2,7 +2,8 @@
 
 Copyright 2026, Forschungszentrum Jülich GmbH
 
-Authors: Hartmut Mohlberg, Daniel Krötz <br>
+Author: Hartmut Mohlberh<br>
+Contriubutor: Daniel Krötz <br>
 Institute of Neuroscience and Medicine (INM-1), Forschungszentrum Jülich GmbH
 
 ---
